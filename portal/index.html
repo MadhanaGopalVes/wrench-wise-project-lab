@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wrench Wise Project Lab · Executive Management Validation Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #08805A;
+      --primary-dark: #05543A;
+      --primary-light: #E6F5EE;
+      --dark: #0F172A;
+      --slate: #334155;
+      --muted: #64748B;
+      --border: #E2E8F0;
+      --surface: #FFFFFF;
+      --bg: #F8FAFC;
+      --radius: 12px;
+      --font: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background-color: var(--bg);
+      color: var(--dark);
+      line-height: 1.5;
+    }
+    header {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .logo-badge {
+      background: linear-gradient(135deg, #08805A, #05543A);
+      color: white;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+    }
+    .brand h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--dark);
+    }
+    .status-group {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 999px;
+    }
+    .badge-success {
+      background: #DCFCE7;
+      color: #166534;
+      border: 1px solid #BBF7D0;
+    }
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10B981;
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    /* Executive Hero */
+    .hero {
+      background: linear-gradient(135deg, #0F172A, #1E293B);
+      color: white;
+      border-radius: var(--radius);
+      padding: 2.25rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2);
+    }
+    .hero h2 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+    .hero p {
+      color: #94A3B8;
+      font-size: 1.05rem;
+      max-width: 850px;
+      line-height: 1.6;
+    }
+
+    /* Project Cards Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 1100px) {
+      .cards-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 20px -5px rgba(0,0,0,0.08);
+      border-color: #CBD5E1;
+    }
+    .card-num {
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 0.75rem;
+    }
+    .card-desc {
+      font-size: 0.88rem;
+      color: var(--slate);
+      margin-bottom: 1.25rem;
+      line-height: 1.5;
+    }
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1.5rem;
+    }
+    .tech-tag {
+      font-size: 0.75rem;
+      background: #F1F5F9;
+      color: var(--slate);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+    .btn-card {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--dark);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s;
+    }
+    .btn-card:hover {
+      background: #334155;
+    }
+
+    /* Live Interactive Frame Viewer */
+    .viewer-section {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04);
+    }
+    .viewer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .tab-btn {
+      padding: 0.55rem 1rem;
+      border: 1px solid var(--border);
+      background: #F8FAFC;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: var(--slate);
+      transition: all 0.15s;
+    }
+    .tab-btn:hover {
+      background: #EDF2F7;
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .live-frame {
+      width: 100%;
+      height: 720px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+    }
+
+    .test-box {
+      background: #0B0F19;
+      color: #38BDF8;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      padding: 1.5rem;
+      border-radius: 8px;
+      line-height: 1.6;
+      max-height: 500px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="logo-badge">WRENCH WISE</div>
+      <h1>Interactive AI Project Lab · Executive Management Portal</h1>
+    </div>
+    <div class="status-group">
+      <span class="badge badge-success">
+        <span class="badge-dot"></span> 6 Functional Projects Live
+      </span>
+      <span class="badge badge-success">
+        <span class="badge-dot"></span> 46/46 Automated Tests Passing
+      </span>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="hero">
+      <h2>Comprehensive Technical Deliverable Suite (6 Active Mini-Projects)</h2>
+      <p>
+        All six technical applications are fully functional, interactive, and powered by authentic machine learning, computer vision, retrieval, and agent backends (Scikit-learn, ONNX Runtime, pypdf, and function-calling agent tools). Prospective learners experience genuine execution with zero mock data.
+      </p>
+    </div>
+
+    <!-- 6 PROJECT CARDS -->
+    <div class="cards-grid">
+      
+      <!-- CARD 1 -->
+      <div class="card">
+        <div>
+          <div class="card-num">Project 01 · Machine Learning</div>
+          <h3 class="card-title">ML Model Builder</h3>
+          <p class="card-desc">
+            Interactive regression pipeline on California Housing (2,500 samples). Train Linear, Ridge, Lasso, and Tree models, inspect learned weights, evaluate MAE/MSE/R², and run live dollar valuations.
+          </p>
+          <div class="tech-stack">
+            <span class="tech-tag">Scikit-learn</span>
+            <span class="tech-tag">Pandas</span>
+            <span class="tech-tag">NumPy</span>
+            <span class="tech-tag">Canvas Charts</span>
+          </div>
+        </div>
+        <button class="btn-card" onclick="switchTab('/ml', 'ML Model Builder', document.getElementById('tab01'))">
+          Launch Live Project 01 &rarr;
+        </button>
+      </div>
+
+      <!-- CARD 2 -->
+      <div class="card">
+        <div>
+          <div class="card-num">Project 02 · Retrieval-Augmented Gen</div>
+          <h3 class="card-title">Build Your Own PDF Chatbot</h3>
+          <p class="card-desc">
+            Complete RAG system. Upload arbitrary PDFs, recursive boundary chunking, sublinear TF-IDF vector indexing, semantic retrieval with cosine scoring, exact page citations, and refusal guardrails.
+          </p>
+          <div class="tech-stack">
+            <span class="tech-tag">pypdf</span>
+            <span class="tech-tag">Vector Search</span>
+            <span class="tech-tag">Cosine Sim</span>
+            <span class="tech-tag">Guardrails</span>
+          </div>
+        </div>
+        <button class="btn-card" onclick="switchTab('/pdf', 'PDF Chatbot (RAG)', document.getElementById('tab02'))">
+          Launch Live Project 02 &rarr;
+        </button>
+      </div>
+
+      <!-- CARD 3 -->
+      <div class="card">
+        <div>
+          <div class="card-num">Project 03 · Autonomous Agents</div>
+          <h3 class="card-title">AI Customer Support Agent</h3>
+          <p class="card-desc">
+            Autonomous agent loop with typed function calling. Queries order fulfillment DB, corporate KB, dispatches tickets, and enforces human supervisor approval on refunds exceeding $50.
+          </p>
+          <div class="tech-stack">
+            <span class="tech-tag">Tool Calling</span>
+            <span class="tech-tag">Perceive-Decide-Act</span>
+            <span class="tech-tag">Human Gate</span>
+            <span class="tech-tag">Trace Timeline</span>
+          </div>
+        </div>
+        <button class="btn-card" onclick="switchTab('/agent', 'Customer Support Agent', document.getElementById('tab03'))">
+          Launch Live Project 03 &rarr;
+        </button>
+      </div>
+
+      <!-- CARD 4 -->
+      <div class="card">
+        <div>
+          <div class="card-num">Project 04 · Classification & Churn</div>
+          <h3 class="card-title">Customer Churn Prediction</h3>
+          <p class="card-desc">
+            End-to-end classification system on 2,500 telecom customer records. Train Random Forest, Gradient Boosting & Logistic models, inspect live Confusion Matrix (TN, FP, FN, TP), and simulate risk scoring personas.
+          </p>
+          <div class="tech-stack">
+            <span class="tech-tag">Classification</span>
+            <span class="tech-tag">Confusion Matrix</span>
+            <span class="tech-tag">ROC-AUC</span>
+            <span class="tech-tag">Risk Playbooks</span>
+          </div>
+        </div>
+        <button class="btn-card" onclick="switchTab('/churn', 'Customer Churn Prediction', document.getElementById('tab04'))">
+          Launch Live Project 04 &rarr;
+        </button>
+      </div>
+
+      <!-- CARD 5 -->
+      <div class="card">
+        <div>
+          <div class="card-num">Project 05 · Computer Vision</div>
+          <h3 class="card-title">AI Image Classifier</h3>
+          <p class="card-desc">
+            Real-time Deep Learning CNN inference with ONNX Runtime on 1,000 ImageNet categories. Drag-and-drop photos, test benchmark gallery, inspect sub-15ms execution latency, and analyze Shannon Entropy uncertainty.
+          </p>
+          <div class="tech-stack">
+            <span class="tech-tag">ONNX Runtime</span>
+            <span class="tech-tag">SqueezeNet CNN</span>
+            <span class="tech-tag">ImageNet 1k</span>
+            <span class="tech-tag">Softmax</span>
+          </div>
+        </div>
+        <button class="btn-card" onclick="switchTab('/vision', 'AI Image Classifier', document.getElementById('tab05'))">
+          Launch Live Project 05 &rarr;
+        </button>
+      </div>
+
+      <!-- CARD 6 -->
+      <div class="card">
+        <div>
+          <div class="card-num">Project 06 · Recommender Systems</div>
+          <h3 class="card-title">Course Recommendation Engine</h3>
+          <p class="card-desc">
+            Hybrid content-based and collaborative filtering system across 25 technical curriculum courses and 1,043 learner ratings. Features adjustable alpha weighting, cold-start handling, and transparent explainability.
+          </p>
+          <div class="tech-stack">
+            <span class="tech-tag">TF-IDF Similarity</span>
+            <span class="tech-tag">User-User Collab</span>
+            <span class="tech-tag">Hybrid Fusion</span>
+            <span class="tech-tag">Explainability</span>
+          </div>
+        </div>
+        <button class="btn-card" onclick="switchTab('/recommender', 'Course Recommendation Engine', document.getElementById('tab06'))">
+          Launch Live Project 06 &rarr;
+        </button>
+      </div>
+
+    </div>
+
+    <!-- LIVE EMBEDDED PROJECT VIEWER -->
+    <div class="viewer-section">
+      <div class="viewer-header">
+        <div class="tabs">
+          <button class="tab-btn active" id="tab01" onclick="switchTab('/ml', 'ML Model Builder', this)">
+            🔬 01: ML Model Builder
+          </button>
+          <button class="tab-btn" id="tab02" onclick="switchTab('/pdf', 'PDF Chatbot (RAG)', this)">
+            📄 02: PDF Chatbot
+          </button>
+          <button class="tab-btn" id="tab03" onclick="switchTab('/agent', 'Customer Support Agent', this)">
+            🤖 03: Support Agent
+          </button>
+          <button class="tab-btn" id="tab04" onclick="switchTab('/churn', 'Customer Churn Prediction', this)">
+            📊 04: Churn Prediction
+          </button>
+          <button class="tab-btn" id="tab05" onclick="switchTab('/vision', 'AI Image Classifier', this)">
+            📷 05: Image Classifier
+          </button>
+          <button class="tab-btn" id="tab06" onclick="switchTab('/recommender', 'Recommendation Engine', this)">
+            ⭐ 06: Recommender Engine
+          </button>
+          <button class="tab-btn" id="tabTests" onclick="showTestLogs(this)">
+            ✅ Full Automated Test Suite (46 Tests)
+          </button>
+        </div>
+        <a id="externalLink" href="/ml" target="_blank" style="font-size:0.85rem; font-weight:600; color:var(--primary); text-decoration:none;">
+          Open in New Window &#8599;
+        </a>
+      </div>
+
+      <iframe id="liveFrame" class="live-frame" src="/ml"></iframe>
+
+      <div id="testLogsContainer" style="display: none;">
+        <div style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem;">
+          Automated Pytest Execution Results (46/46 Tests Passing):
+        </div>
+        <div class="test-box">============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.2.0, pluggy-1.7.0 -- python.exe
+rootdir: C:\Users\Hp\Documents\Codex\2026-07-23\wrench-wise-delivery-intelligence-platform-project\outputs\Lead Magnet
+plugins: anyio-4.14.2
+collected 46 items
+
+projects/ml-model-builder/tests/test_ml_backend.py::test_dataset_loads_correctly PASSED [  2%]
+projects/ml-model-builder/tests/test_ml_backend.py::test_train_linear_regression PASSED [  4%]
+projects/ml-model-builder/tests/test_ml_backend.py::test_train_ridge_regularization PASSED [  6%]
+projects/ml-model-builder/tests/test_ml_backend.py::test_train_decision_tree_feature_importances PASSED [  8%]
+projects/ml-model-builder/tests/test_ml_backend.py::test_train_random_forest PASSED [ 10%]
+projects/ml-model-builder/tests/test_ml_backend.py::test_empty_features_raises_value_error PASSED [ 13%]
+projects/ml-model-builder/tests/test_ml_backend.py::test_invalid_algorithm_raises_error PASSED [ 15%]
+projects/ml-model-builder/tests/test_ml_backend.py::test_prediction_inference PASSED [ 17%]
+projects/pdf-chatbot/tests/test_rag_pipeline.py::test_pdf_extraction PASSED [ 19%]
+projects/pdf-chatbot/tests/test_rag_pipeline.py::test_document_chunking PASSED [ 21%]
+projects/pdf-chatbot/tests/test_rag_pipeline.py::test_vector_indexing_and_search PASSED [ 23%]
+projects/pdf-chatbot/tests/test_rag_pipeline.py::test_rag_end_to_end_grounded_answer PASSED [ 26%]
+projects/pdf-chatbot/tests/test_rag_pipeline.py::test_rag_out_of_context_refusal PASSED [ 28%]
+projects/pdf-chatbot/tests/test_rag_pipeline.py::test_corrupted_pdf_error_handling PASSED [ 30%]
+projects/customer-support-agent/tests/test_agent_tools.py::test_tool_definitions_schema PASSED [ 32%]
+projects/customer-support-agent/tests/test_agent_tools.py::test_order_lookup_success PASSED [ 34%]
+projects/customer-support-agent/tests/test_agent_tools.py::test_order_lookup_not_found PASSED [ 36%]
+projects/customer-support-agent/tests/test_agent_tools.py::test_kb_policy_search PASSED [ 39%]
+projects/customer-support-agent/tests/test_agent_tools.py::test_refund_under_threshold_auto_approved PASSED [ 41%]
+projects/customer-support-agent/tests/test_agent_tools.py::test_refund_over_threshold_requires_human_approval PASSED [ 43%]
+projects/customer-support-agent/tests/test_agent_tools.py::test_agent_order_inquiry_scenario PASSED [ 45%]
+projects/customer-support-agent/tests/test_agent_tools.py::test_agent_damaged_goods_escalation_scenario PASSED [ 47%]
+projects/customer-support-agent/tests/test_agent_tools.py::test_agent_high_value_refund_scenario PASSED [ 50%]
+projects/churn-prediction/tests/test_churn.py::test_dataset_loads_correctly PASSED [ 52%]
+projects/churn-prediction/tests/test_churn.py::test_train_random_forest_classification PASSED [ 54%]
+projects/churn-prediction/tests/test_churn.py::test_train_logistic_regression PASSED [ 56%]
+projects/churn-prediction/tests/test_churn.py::test_train_decision_tree PASSED [ 58%]
+projects/churn-prediction/tests/test_churn.py::test_train_gradient_boosting PASSED [ 60%]
+projects/churn-prediction/tests/test_churn.py::test_empty_features_error PASSED [ 63%]
+projects/churn-prediction/tests/test_churn.py::test_invalid_algorithm_error PASSED [ 65%]
+projects/churn-prediction/tests/test_churn.py::test_predict_churn_risk_profiles PASSED [ 67%]
+projects/ai-image-classifier/tests/test_vision.py::test_model_and_classes_load_successfully PASSED [ 69%]
+projects/ai-image-classifier/tests/test_vision.py::test_image_preprocessing_tensor_shape PASSED [ 71%]
+projects/ai-image-classifier/tests/test_vision.py::test_classify_golden_retriever_sample PASSED [ 73%]
+projects/ai-image-classifier/tests/test_vision.py::test_classify_sports_car_sample PASSED [ 76%]
+projects/ai-image-classifier/tests/test_vision.py::test_probability_distribution_normalization PASSED [ 78%]
+projects/ai-image-classifier/tests/test_vision.py::test_get_sample_images_list PASSED [ 80%]
+projects/ai-image-classifier/tests/test_vision.py::test_missing_sample_raises_filenotfound PASSED [ 82%]
+projects/recommendation-engine/tests/test_recommender.py::test_datasets_load_successfully PASSED [ 84%]
+projects/recommendation-engine/tests/test_recommender.py::test_tfidf_content_model_built PASSED [ 86%]
+projects/recommendation-engine/tests/test_recommender.py::test_collaborative_filtering_matrix_built PASSED [ 89%]
+projects/recommendation-engine/tests/test_recommender.py::test_recommend_existing_user_hybrid PASSED [ 91%]
+projects/recommendation-engine/tests/test_recommender.py::test_cold_start_fallback_new_user PASSED [ 93%]
+projects/recommendation-engine/tests/test_recommender.py::test_pure_content_vs_pure_collaborative_modes PASSED [ 95%]
+projects/recommendation-engine/tests/test_recommender.py::test_add_rating_and_rebuild PASSED [ 97%]
+projects/recommendation-engine/tests/test_recommender.py::test_invalid_rating_value_raises_error PASSED [100%]
+
+======================= 46 passed, 1 warning in 22.71s ========================</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function switchTab(url, title, btn) {
+      document.getElementById('liveFrame').style.display = 'block';
+      document.getElementById('testLogsContainer').style.display = 'none';
+      document.getElementById('liveFrame').src = url;
+      document.getElementById('externalLink').href = url;
+      document.getElementById('externalLink').textContent = `Open ${title} in New Window ↗`;
+
+      if (btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+    }
+
+    function showTestLogs(btn) {
+      document.getElementById('liveFrame').style.display = 'none';
+      document.getElementById('testLogsContainer').style.display = 'block';
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+    }
+  </script>
+</body>
+</html>

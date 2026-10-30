@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Build Your Own PDF Chatbot (RAG) · Wrench Wise Project Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span class="brand-badge">WW PROJECT 02</span>
+      <h1 class="brand-title">Build Your Own PDF Chatbot (RAG)</h1>
+    </div>
+    <div class="status-pill" id="backendStatus">
+      <span class="status-dot"></span>
+      <span id="statusText">Connecting to FastAPI RAG Engine...</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- LEFT PANEL: INGESTION, CHUNKING & DOCUMENT STATS -->
+    <aside>
+      <!-- DROPZONE -->
+      <div class="panel">
+        <h2 class="panel-title">
+          <span>📄</span> 1. PDF Document Ingestion
+        </h2>
+        <p class="panel-desc">Upload your own PDF document to extract, chunk, and index into the vector space.</p>
+
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">📥</div>
+          <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem;">Click or Drag & Drop PDF here</div>
+          <div style="font-size: 0.78rem; color: var(--muted);">Supports text-based PDF documents up to 25MB</div>
+          <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+        </div>
+
+        <button class="btn btn-secondary" id="loadSampleBtn" style="margin-top: 0.75rem;">
+          <span>📑</span> Load Sample Delivery Platform Manual
+        </button>
+
+        <div id="docMetadataBox" class="meta-box" style="display: none;">
+          <div style="font-weight: 700; margin-bottom: 0.35rem;" id="docTitle">Document Loaded</div>
+          <div style="display: flex; gap: 1rem; font-size: 0.8rem; color: #166534;">
+            <span id="docPages">Pages: -</span>
+            <span id="docWords">Words: -</span>
+            <span id="docChunks">Chunks: -</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHUNKING PARAMETERS -->
+      <div class="panel">
+        <h2 class="panel-title">
+          <span>✂️</span> 2. Chunking & Retrieval Tuning
+        </h2>
+        
+        <div style="margin-bottom: 1rem;">
+          <label style="font-size: 0.85rem; font-weight: 600; display:flex; justify-content:space-between;">
+            <span>Chunk Size (chars):</span>
+            <span id="chunkSizeLabel" style="font-family: monospace;">450</span>
+          </label>
+          <input type="range" id="chunkSizeRange" min="200" max="1000" value="450" step="50" style="width:100%; accent-color:#3B82F6;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <label style="font-size: 0.85rem; font-weight: 600; display:flex; justify-content:space-between;">
+            <span>Chunk Overlap (chars):</span>
+            <span id="overlapLabel" style="font-family: monospace;">80</span>
+          </label>
+          <input type="range" id="overlapRange" min="20" max="200" value="80" step="10" style="width:100%; accent-color:#3B82F6;">
+        </div>
+
+        <div>
+          <label style="font-size: 0.85rem; font-weight: 600; display:flex; justify-content:space-between;">
+            <span>Top-K Chunks to Retrieve:</span>
+            <span id="topKLabel" style="font-family: monospace;">3</span>
+          </label>
+          <input type="range" id="topKRange" min="1" max="5" value="3" step="1" style="width:100%; accent-color:#3B82F6;">
+        </div>
+      </div>
+
+      <!-- CHUNK EXPLORER -->
+      <div class="panel">
+        <h2 class="panel-title">
+          <span>📦</span> 3. Document Chunk Explorer
+        </h2>
+        <p class="panel-desc">All indexed passages partitioned with sliding-window overlap.</p>
+        <div class="chunks-scroll" id="chunksContainer">
+          <div style="text-align: center; color: var(--muted); padding: 2rem 0; font-size: 0.85rem;">
+            No document ingested yet. Upload a PDF above.
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT PANEL: CHAT INTERFACE & RETRIEVAL INSPECTOR -->
+    <section>
+      <!-- CHAT INTERFACE -->
+      <div class="panel" style="padding: 1.25rem;">
+        <h2 class="panel-title">
+          <span>💬</span> 4. Context-Grounded Document Q&A
+        </h2>
+        <p class="panel-desc">Questions are answered strictly using retrieved text passages. Unsupported questions trigger automatic refusal guardrails.</p>
+
+        <div class="chat-window" id="chatWindow">
+          <div class="message assistant">
+            <div class="message-bubble">
+              👋 Welcome! Upload a PDF or click <strong>Load Sample Manual</strong> to start asking questions grounded in your document.
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-input-bar">
+          <input type="text" id="chatInput" class="chat-input" placeholder="Ask a question about the uploaded document..." disabled>
+          <button class="btn" id="sendBtn" style="width: auto; padding: 0.75rem 1.5rem;" disabled>
+            <span>Ask</span>
+          </button>
+        </div>
+
+        <div class="quick-prompts" id="quickPrompts">
+          <span style="font-size: 0.75rem; color: var(--muted); align-self: center;">Quick test queries:</span>
+          <button class="prompt-chip" data-q="What is the dispatch interval?">What is the dispatch interval?</button>
+          <button class="prompt-chip" data-q="What encryption and authentication are used?">What encryption is used?</button>
+          <button class="prompt-chip" data-q="What is the uptime SLA?">What is the uptime SLA?</button>
+          <button class="prompt-chip" data-q="Can I bake chocolate chip cookies with this?" style="border-color: #FCA5A5; color: #DC2626;">Test Refusal Guardrail</button>
+        </div>
+      </div>
+
+      <!-- RETRIEVAL INSPECTION PANEL -->
+      <div class="panel">
+        <h2 class="panel-title">
+          <span>🔍</span> 5. Semantic Retrieval Inspector Panel
+        </h2>
+        <p class="panel-desc">Inspect exact passages retrieved by the vector engine, their cosine similarity scores, and citation provenance.</p>
+
+        <div id="inspectorContainer">
+          <div style="text-align: center; color: var(--muted); padding: 1.5rem; font-size: 0.85rem; border: 1px dashed var(--border); border-radius: 8px;">
+            Ask a question in the chat above to inspect retrieved document chunks.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

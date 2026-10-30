@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: wrench-wise-project-lab
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/system/status
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: CERT_SECRET
+        generateValue: true
+      - key: SESSION_DAYS
+        value: 90
+      - key: PASS_MARK
+        value: 70
+      - key: RATE_LIMIT_PER_MIN
+        value: 120
+      - key: OPENBLAS_NUM_THREADS
+        value: 1
+      - key: OMP_NUM_THREADS
+        value: 1

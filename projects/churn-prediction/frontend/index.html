@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Churn Prediction · Wrench Wise Project Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <a href="http://localhost:3000" class="back-link" title="Back to Project Lab">← Lab</a>
+      <span class="brand-badge">WISE ML LAB · PROJECT 04</span>
+      <h1 class="brand-title">Customer Churn Prediction & Retention Analytics</h1>
+    </div>
+    <div class="status-pill" id="backendStatus">
+      <span class="status-dot"></span>
+      <span id="statusText">Connecting to Python FastAPI (Port 8004)...</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- LEFT PANEL: CONTROLS, MODEL CONFIG & RISK SIMULATOR -->
+    <aside class="sidebar">
+      
+      <!-- DATASET OVERVIEW -->
+      <div class="panel">
+        <h2 class="panel-title"><span>📊</span> 1. Telecom Dataset Overview</h2>
+        <p class="panel-desc">2,500 real customer records with retention status, contract terms and monthly spend.</p>
+        <div class="dataset-stats" id="datasetStats">
+          <div class="stat-pill"><span class="stat-label">Total Records:</span> <strong id="totalRecords">2,500</strong></div>
+          <div class="stat-pill"><span class="stat-label">Churn Rate:</span> <strong id="churnRate" class="text-danger">28.6%</strong></div>
+          <div class="stat-pill"><span class="stat-label">Retained:</span> <strong id="retainedCount" class="text-success">1,785</strong></div>
+          <div class="stat-pill"><span class="stat-label">Churned:</span> <strong id="churnCount" class="text-warning">715</strong></div>
+        </div>
+      </div>
+
+      <!-- FEATURE SELECTION -->
+      <div class="panel">
+        <div class="panel-header-inline">
+          <h2 class="panel-title"><span>⚙️</span> 2. Feature Selection</h2>
+          <button type="button" class="btn-text" id="toggleAllFeatures">Select All</button>
+        </div>
+        <p class="panel-desc">Select input signals used to train the classification models.</p>
+        
+        <div class="feature-category-label">Numeric Predictors</div>
+        <div class="feature-grid" id="numericFeaturesContainer">
+          <!-- Populated dynamically -->
+        </div>
+
+        <div class="feature-category-label" style="margin-top: 0.75rem;">Categorical Predictors</div>
+        <div class="feature-grid" id="categoricalFeaturesContainer">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- ALGORITHM & HYPERPARAMETERS -->
+      <div class="panel">
+        <h2 class="panel-title"><span>🧠</span> 3. Classification Algorithm</h2>
+        
+        <div class="form-group">
+          <label for="algoSelect">Model Type</label>
+          <select id="algoSelect">
+            <option value="random_forest" selected>Random Forest Classifier (Ensemble)</option>
+            <option value="gradient_boosting">Gradient Boosting Classifier</option>
+            <option value="logistic_regression">Logistic Regression (L2 / Sigmoid)</option>
+            <option value="decision_tree">Decision Tree (CART / Gini Impurity)</option>
+          </select>
+        </div>
+
+        <!-- DYNAMIC HYPERPARAMETERS -->
+        <div id="hyperparamsBox">
+          <div class="form-group" id="nEstGroup">
+            <label for="nEstInput">Number of Trees (n_estimators): <strong id="nEstVal">30</strong></label>
+            <input type="range" id="nEstInput" min="10" max="100" value="30" step="5">
+          </div>
+          <div class="form-group" id="maxDepthGroup">
+            <label for="maxDepthInput">Max Tree Depth: <strong id="maxDepthVal">6</strong></label>
+            <input type="range" id="maxDepthInput" min="2" max="15" value="6" step="1">
+          </div>
+          <div class="form-group" id="cGroup" style="display: none;">
+            <label for="cInput">Inverse Regularization (C = 1/λ): <strong id="cVal">1.0</strong></label>
+            <input type="range" id="cInput" min="0.1" max="5.0" value="1.0" step="0.1">
+          </div>
+          <div class="form-group" id="lrGroup" style="display: none;">
+            <label for="lrInput">Learning Rate (η): <strong id="lrVal">0.1</strong></label>
+            <input type="range" id="lrInput" min="0.01" max="0.5" value="0.1" step="0.01">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Test Split Ratio: <strong id="testSplitVal">20%</strong> (500 validation samples)</label>
+          <input type="range" id="testSplitRange" min="10" max="40" value="20" step="5">
+        </div>
+
+        <button class="btn btn-primary" id="trainBtn">
+          <span>🚀</span> Train Classification Model
+        </button>
+      </div>
+
+      <!-- INTERACTIVE CUSTOMER RISK SCORING PLAYGROUND -->
+      <div class="panel">
+        <h2 class="panel-title"><span>🔮</span> 4. Real-time Customer Risk Scoring</h2>
+        <p class="panel-desc">Test the active trained model by simulating specific customer personas.</p>
+        
+        <div class="quick-personas">
+          <button type="button" class="btn-persona" id="personaHighRisk">🔴 High Risk New Customer</button>
+          <button type="button" class="btn-persona" id="personaLowRisk">🟢 Loyal Enterprise Customer</button>
+        </div>
+
+        <form id="riskProfileForm">
+          <div class="form-group">
+            <label for="simTenure">Tenure: <strong id="simTenureVal">2</strong> months</label>
+            <input type="range" id="simTenure" min="1" max="72" value="2">
+          </div>
+          <div class="form-group">
+            <label for="simMonthly">Monthly Charges: $ <strong id="simMonthlyVal">105.00</strong></label>
+            <input type="range" id="simMonthly" min="18.5" max="118.5" value="105.0" step="0.5">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="simContract">Contract Type</label>
+              <select id="simContract">
+                <option value="Month-to-month" selected>Month-to-month</option>
+                <option value="One year">One year</option>
+                <option value="Two year">Two year</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="simInternet">Internet Service</label>
+              <select id="simInternet">
+                <option value="Fiber optic" selected>Fiber optic</option>
+                <option value="DSL">DSL</option>
+                <option value="No">No Internet</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="simTechSupport">Tech Support</label>
+              <select id="simTechSupport">
+                <option value="No" selected>No Tech Support</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="simSecurity">Online Security</label>
+              <select id="simSecurity">
+                <option value="No" selected>No Security</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="simPayment">Payment Method</label>
+            <select id="simPayment">
+              <option value="Electronic check" selected>Electronic check (High friction)</option>
+              <option value="Mailed check">Mailed check</option>
+              <option value="Bank transfer">Bank transfer (Auto-pay)</option>
+              <option value="Credit card">Credit card (Auto-pay)</option>
+            </select>
+          </div>
+
+          <button type="button" class="btn btn-secondary" id="predictRiskBtn">
+            <span>⚡</span> Calculate Churn Probability
+          </button>
+        </form>
+
+        <!-- PREDICTION RESULT CARD -->
+        <div id="riskResultCard" class="risk-card" style="display: none;">
+          <div class="risk-header">
+            <span class="risk-tier-badge" id="riskTierBadge">HIGH RISK</span>
+            <span class="risk-percent" id="riskProbabilityText">78.4%</span>
+          </div>
+          <div class="risk-progress-bar">
+            <div class="risk-progress-fill" id="riskProgressFill" style="width: 78.4%;"></div>
+          </div>
+          <div class="recommendation-box">
+            <strong>Recommended Retention Playbook:</strong>
+            <p id="recommendationText">Offer 6-month contract renewal discount with complimentary premium tech support.</p>
+          </div>
+        </div>
+
+      </div>
+
+    </aside>
+
+    <!-- RIGHT PANEL: DIAGNOSTIC DASHBOARD & EVALUATION -->
+    <section class="main-content">
+      
+      <!-- PERFORMANCE METRIC CARDS -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-title">Accuracy</span>
+          <span class="metric-value" id="valAccuracy">--</span>
+          <span class="metric-sub">Overall correct test classifications</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Precision (PPV)</span>
+          <span class="metric-value text-primary" id="valPrecision">--</span>
+          <span class="metric-sub">True churners out of predicted churners</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Recall / Sensitivity</span>
+          <span class="metric-value text-accent" id="valRecall">--</span>
+          <span class="metric-sub">Identified churners out of actual churners</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">F1 Score</span>
+          <span class="metric-value" id="valF1">--</span>
+          <span class="metric-sub">Harmonic mean of precision & recall</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">ROC-AUC</span>
+          <span class="metric-value" id="valRocAuc">--</span>
+          <span class="metric-sub">Area under the ROC curve [0.5 - 1.0]</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Training Latency</span>
+          <span class="metric-value" id="valLatency">--</span>
+          <span class="metric-sub">Python Scikit-learn execution time</span>
+        </div>
+      </div>
+
+      <!-- CONFUSION MATRIX & INTERPRETATION -->
+      <div class="content-panel">
+        <div class="panel-header-flex">
+          <div>
+            <h2 class="panel-title"><span>📐</span> Confusion Matrix Diagnostic</h2>
+            <p class="panel-desc">Evaluate the trade-off between False Positives (unnecessary promotions) and False Negatives (lost customers).</p>
+          </div>
+          <div class="badge-execution">REAL SCIKIT-LEARN EVALUATION</div>
+        </div>
+
+        <div class="cm-layout">
+          <div class="cm-table-wrapper">
+            <table class="cm-table">
+              <thead>
+                <tr>
+                  <th colspan="2" rowspan="2"></th>
+                  <th colspan="2" class="cm-header-pred">Predicted Label</th>
+                </tr>
+                <tr>
+                  <th class="cm-subhead">Retained (0)</th>
+                  <th class="cm-subhead">Churned (1)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th rowspan="2" class="cm-header-act"><span>Actual Label</span></th>
+                  <th class="cm-subhead-row">Retained (0)</th>
+                  <td class="cm-cell cm-tn" id="cmTN">
+                    <span class="cm-num">--</span>
+                    <span class="cm-label">True Negative (TN)</span>
+                  </td>
+                  <td class="cm-cell cm-fp" id="cmFP">
+                    <span class="cm-num">--</span>
+                    <span class="cm-label">False Positive (FP)</span>
+                  </td>
+                </tr>
+                <tr>
+                  <th class="cm-subhead-row">Churned (1)</th>
+                  <td class="cm-cell cm-fn" id="cmFN">
+                    <span class="cm-num">--</span>
+                    <span class="cm-label">False Negative (FN)</span>
+                  </td>
+                  <td class="cm-cell cm-tp" id="cmTP">
+                    <span class="cm-num">--</span>
+                    <span class="cm-label">True Positive (TP)</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="cm-insights">
+            <h3>Business Retention Impact Analysis</h3>
+            <div class="insight-item">
+              <strong>🚨 False Negatives (Costliest Error):</strong>
+              <p>Customers predicted to stay who actually churned. Each FN represents customer lifetime value (LTV) lost without proactive intervention.</p>
+            </div>
+            <div class="insight-item">
+              <strong>⚠️ False Positives:</strong>
+              <p>Loyal customers predicted to churn. Each FP incurs unnecessary retention promo discounts or marketing outreach costs.</p>
+            </div>
+            <div class="insight-item">
+              <strong>🎯 Precision vs Recall Trade-off:</strong>
+              <p id="tradeoffText">Click 'Train Model' to calculate exact rates.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOP FEATURE IMPORTANCES -->
+      <div class="content-panel">
+        <h2 class="panel-title"><span>📈</span> Feature Importance / Model Weights</h2>
+        <p class="panel-desc">Normalized relative contribution of each feature to churn classification.</p>
+        
+        <div id="featureImportanceList" class="importance-list">
+          <p class="empty-state">Train a model to inspect top predictive signals.</p>
+        </div>
+      </div>
+
+      <!-- DATASET EXPLORER -->
+      <div class="content-panel">
+        <div class="panel-header-flex">
+          <div>
+            <h2 class="panel-title"><span>📋</span> Sample Dataset Inspector</h2>
+            <p class="panel-desc">Browse actual customer records from the 2,500 telecom dataset.</p>
+          </div>
+          <div class="table-filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="churned">Churned (1)</button>
+            <button class="filter-btn" data-filter="retained">Retained (0)</button>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table class="data-table" id="sampleDataTable">
+            <thead>
+              <tr>
+                <th>Customer ID</th>
+                <th>Tenure</th>
+                <th>Monthly ($)</th>
+                <th>Total ($)</th>
+                <th>Contract</th>
+                <th>Internet</th>
+                <th>Tech Support</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="sampleTableBody">
+              <tr><td colspan="8" style="text-align: center; color: var(--muted);">Loading records...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

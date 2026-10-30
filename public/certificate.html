@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wrench Wise Project Certificate</title>
+<meta name="description" content="Verified certificate of completion for Wrench Wise Project Lab.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/app.css">
+<style>
+.cert-actions{display:flex;gap:12px;justify-content:center;margin:24px 0 36px;flex-wrap:wrap}
+@media print {
+  .cert-actions, .nav, footer { display: none !important; }
+  body { background: white !important; }
+}
+</style>
+</head>
+<body>
+<main>
+  <div class="wrap cert-actions">
+    <button class="btn" onclick="window.print()">Print / Save as PDF</button>
+    <a class="btn ghost" id="verifyLink" href="#">Open verification page</a>
+    <a class="btn ghost" href="/">Back to Project Lab</a>
+  </div>
+
+  <div class="certificate" id="cert">
+    <div class="logo" style="justify-content:center;font-size:24px">
+      <i style="width:40px;height:40px;border-radius:12px;background:var(--green);display:grid;place-items:center">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L3.5 17.2a1.8 1.8 0 0 0 2.6 2.6l5.8-5.8a4 4 0 0 0 5.1-5.4l-2.4 2.4-2.1-.5-.5-2.1z"/></svg>
+      </i>
+      <span>Wrench <b style="color:var(--green)">Wise</b></span>
+    </div>
+
+    <h1>CERTIFICATE OF COMPLETION</h1>
+    <p style="letter-spacing:0.12em;font-weight:600;color:var(--muted);font-size:13px;margin-top:12px">THIS IS PROUDLY PRESENTED TO</p>
+    
+    <div class="holder" id="c-name">Loading...</div>
+    
+    <p style="font-size:15px;color:var(--ink-2);max-width:540px;margin:12px auto 6px">
+      for successfully completing the interactive hands-on project and practical assessment in
+    </p>
+
+    <div class="proj" id="c-proj">...</div>
+
+    <div style="margin:20px 0">
+      <span class="pill dark" id="c-score" style="font-size:14px;padding:6px 16px">Score: ...</span>
+    </div>
+
+    <div class="row">
+      <div style="text-align:left">
+        <div><b>Certificate ID:</b> <code id="c-id" style="font-family:var(--mono);color:var(--ink);font-weight:700">...</code></div>
+        <div><b>Issued on:</b> <span id="c-date">...</span></div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:700;color:var(--ink);font-size:15px">Wrench Wise Learning Platform</div>
+        <div style="font-size:12px;color:var(--muted)">Verified AI & Engineering Lab</div>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="/js/common.js"></script>
+<script>
+renderNav(false);
+const certId = location.pathname.split('/').pop();
+(async () => {
+  try {
+    const res = await api('/api/certificate/' + certId);
+    $('#c-name').textContent = res.name;
+    $('#c-proj').textContent = res.project;
+    $('#c-score').textContent = `Overall Completion Score: ${res.score}%`;
+    $('#c-id').textContent = res.id;
+    $('#c-date').textContent = fmtDate(res.issued_at);
+    $('#verifyLink').href = '/verify/' + res.id;
+    document.title = `${res.name} - Certificate | Wrench Wise`;
+  } catch (e) {
+    $('#cert').innerHTML = `<div class="empty"><h3>Certificate Unavailable</h3><p>${esc(e.message)}</p><a class="btn" href="/">Return to Project Lab</a></div>`;
+  }
+  renderFooter();
+})();
+</script>
+</body>
+</html>

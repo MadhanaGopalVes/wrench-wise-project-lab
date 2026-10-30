@@ -1,0 +1,26 @@
+[
+  {
+    "id": "KB-01",
+    "topic": "return_policy",
+    "title": "30-Day Standard Return Policy",
+    "content": "Items can be returned within 30 days of delivery if they are in original packaging and undamaged condition. Customers are provided a prepaid return shipping label. Once received at our fulfillment center, inspections take 2 business days."
+  },
+  {
+    "id": "KB-02",
+    "topic": "refund_policy",
+    "title": "Refund Rules and Approval Thresholds",
+    "content": "Refunds up to $50.00 can be issued directly by automated support agents upon customer request for minor defects or shipping delays exceeding 5 days. Any refund exceeding $50.00 requires mandatory Human Supervisor Approval to prevent fraud. Approved refunds take 3-5 business days to credit back to the original payment method."
+  },
+  {
+    "id": "KB-03",
+    "topic": "damaged_items",
+    "title": "Damaged or Defective Item Replacement",
+    "content": "If an item arrives damaged, the customer must submit photographic evidence or confirm package condition. The agent will create an expedited Tier-2 Replacement Ticket. The replacement unit is dispatched within 24 hours at no additional charge."
+  },
+  {
+    "id": "KB-04",
+    "topic": "shipping_delays",
+    "title": "Weather Delays and Carrier Exceptions",
+    "content": "If a shipment encounters an active carrier weather delay or logistical rerouting, carriers require a 48-hour grace period before an investigation is initiated. For packages delayed longer than 4 days past the estimated delivery date, agents may offer a $15 store credit courtesy discount."
+  }
+]

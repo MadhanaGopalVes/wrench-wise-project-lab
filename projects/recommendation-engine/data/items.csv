@@ -1,0 +1,26 @@
+item_id,title,category,description,level,avg_rating
+c101,Foundations of Machine Learning,AI & ML,"Supervised learning, linear models, gradient descent, regularisation, bias-variance tradeoff",Beginner,4.8
+c102,Deep Learning & Neural Architectures,AI & ML,"Backpropagation, PyTorch, CNNs, RNNs, optimization techniques, loss landscapes",Intermediate,4.9
+c103,Customer Churn & Classification Lab,AI & ML,"Binary classification, random forests, confusion matrices, ROC-AUC, telemetry",Intermediate,4.7
+c104,Applied Computer Vision with CNNs,AI & ML,"Image classification, object detection, transfer learning, ONNX runtime, SqueezeNet",Intermediate,4.8
+c105,Mathematics for Machine Learning,AI & ML,"Linear algebra, matrix decomposition, multivariate calculus, probability distributions",Beginner,4.6
+c106,Time Series Forecasting & Anomaly Detection,AI & ML,"ARIMA, Prophet, LSTM, seasonal decomposition, outlier detection",Advanced,4.7
+c107,Reinforcement Learning & Policy Optimization,AI & ML,"Markov decision processes, Q-learning, policy gradients, actor-critic",Advanced,4.8
+c201,Building Production RAG Systems,Generative AI,"Vector databases, TF-IDF, embeddings, chunking strategies, cosine similarity retrieval",Intermediate,4.9
+c202,Prompt Engineering & Guardrails,Generative AI,"Few-shot prompting, chain-of-thought, hallucination mitigation, prompt injection defense",Beginner,4.7
+c203,Fine-Tuning Open Source LLMs,Generative AI,"LoRA, QLoRA, parameter efficient fine-tuning, instruction tuning, PEFT",Advanced,4.9
+c204,AI Document Intelligence & Parsing,Generative AI,"PDF text streams, layout analysis, table extraction, multi-modal LLM reasoning",Intermediate,4.7
+c205,Vector Search & Embedding Systems,Generative AI,"HNSW, IVF, Pinecone, ChromaDB, semantic search, cosine distance metrics",Intermediate,4.8
+c301,Agentic AI Architecture & Tool Calling,Agentic AI,"Function calling, tool execution loops, scratchpads, state management, ReAct pattern",Intermediate,4.9
+c302,Human-in-the-Loop AI Systems,Agentic AI,"Supervisory approval gates, transactional refund safety, policy auditing, audit trails",Intermediate,4.8
+c303,Multi-Agent Orchestration & Consensus,Agentic AI,"Role-based agents, critic patterns, agent-to-agent communication, conflict resolution",Advanced,4.9
+c304,Autonomous Customer Support Bots,Agentic AI,"Order lookup, refund processing, ticketing integration, rule validation",Intermediate,4.7
+c401,Modern Full-Stack Development with Fastify,Full-Stack,"Node.js, REST APIs, asynchronous event loops, SQLite WAL mode, security headers",Beginner,4.8
+c402,FastAPI Microservices Architecture,Full-Stack,"Python, Pydantic, asynchronous endpoints, Uvicorn, OpenAPI documentation",Beginner,4.9
+c403,Clean Architecture & Domain Driven Design,Full-Stack,"Separation of concerns, repository patterns, outbox queues, idempotency",Intermediate,4.8
+c404,Scalable WebSocket & Real-Time Apps,Full-Stack,"Bidirectional protocols, socket rooms, live dashboards, reconnect backoff",Intermediate,4.7
+c405,Containerization with Docker & Podman,Full-Stack,"Multi-stage builds, container isolation, volume mounts, microservice networking",Beginner,4.8
+c501,Data Pipelines with Apache Spark & PySpark,Data Eng,"Distributed compute, RDDs, DataFrames, streaming ingestion, partitioning",Intermediate,4.8
+c502,Data Warehousing & Dimensional Modeling,Data Eng,"Star schemas, Snowflake, DBT, ETL orchestration, data quality testing",Intermediate,4.7
+c503,Kubernetes Cluster Administration,DevOps,"Deployments, services, ingress controllers, configmaps, persistent volumes",Advanced,4.8
+c504,CI/CD Automation with GitHub Actions,DevOps,"Automated test runners, matrix builds, release packaging, artifact publishing",Beginner,4.7

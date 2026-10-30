@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Certification Programme | Wrench Wise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<main id="app">
+  <div class="wrap" style="padding:60px 24px;max-width:800px">
+    <div id="prog">
+      <span class="spin dark"></span> Loading programme information...
+    </div>
+  </div>
+</main>
+<script src="/js/common.js"></script>
+<script>
+renderNav(true);
+const slug = location.pathname.split('/').pop();
+const intent = new URLSearchParams(location.search).get('intent');
+
+(async () => {
+  try {
+    const res = await api('/api/programme/' + slug);
+    const p = res.programme;
+    $('#prog').innerHTML = `
+      <span class="eyebrow">WRENCH WISE CERTIFICATION PROGRAMME</span>
+      <h1 style="margin:12px 0 16px">${esc(p.name)}</h1>
+      <div class="facts" style="margin-bottom:28px">
+        <span class="pill" style="font-size:15px;padding:8px 18px">Duration: ${esc(p.duration)}</span>
+        <span class="pill dark" style="font-size:15px;padding:8px 18px">Format: ${esc(p.mode)}</span>
+      </div>
+
+      <div class="panel" style="margin-bottom:28px">
+        <h2>What You'll Master</h2>
+        <div class="hl" style="grid-template-columns:1fr;gap:16px;margin-top:16px">
+          ${p.highlights.map(h => `<div style="font-size:16px"><span style="color:var(--green)">✔</span> ${esc(h)}</div>`).join('')}
+        </div>
+      </div>
+
+      <div class="panel" style="background:var(--green-l);border-color:var(--green-m);text-align:center;padding:36px">
+        <h3 style="margin-bottom:8px">${intent === 'syllabus' ? 'Request Full Curriculum & Syllabus' : 'Enquire About Upcoming Batches'}</h3>
+        <p class="note" style="margin-bottom:20px">Our programme counsellors will connect with curriculum details, pricing and scholarship opportunities.</p>
+        <button class="btn" id="enqBtn">Talk to an Academic Advisor</button>
+      </div>
+
+      <p class="note" style="margin-top:20px;text-align:center">
+        <b>Note:</b> This is the programme gateway within the Wrench Wise Project Lab ecosystem. When the main Wrench Wise website goes live, this connects to the official course portal.
+      </p>
+    `;
+
+    $('#enqBtn').addEventListener('click', () => {
+      toast("Thank you! Our advisory team will reach out to your registered contact number.");
+    });
+  } catch (e) {
+    $('#prog').innerHTML = `<div class="empty"><h3>Programme Not Found</h3><p>${esc(e.message)}</p><a class="btn" href="/">Back to Projects</a></div>`;
+  }
+  renderFooter();
+})();
+</script>
+</body>
+</html>

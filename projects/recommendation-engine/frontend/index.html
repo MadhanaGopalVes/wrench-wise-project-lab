@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recommendation Engine · Wrench Wise Project Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <a href="http://localhost:3000" class="back-link" title="Back to Project Lab">← Lab</a>
+      <span class="brand-badge">WISE ML LAB · PROJECT 06</span>
+      <h1 class="brand-title">Personalized Course Recommendation Engine</h1>
+    </div>
+    <div class="status-pill" id="backendStatus">
+      <span class="status-dot"></span>
+      <span id="statusText">Connecting to Recommender Backend (Port 8006)...</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- LEFT PANEL: USER PROFILE & CONFIG -->
+    <aside class="sidebar">
+
+      <!-- LEARNER PROFILE SELECTOR -->
+      <div class="panel">
+        <h2 class="panel-title"><span>👤</span> 1. Learner Profile & History</h2>
+        <p class="panel-desc">Select an active learner profile to inspect their course completions and rating matrix.</p>
+
+        <div class="form-group">
+          <label for="userSelect">Active Learner Profile</label>
+          <select id="userSelect">
+            <!-- Populated via /api/catalog -->
+          </select>
+        </div>
+
+        <div class="user-history-box">
+          <div class="history-header">
+            <span>Completed & Rated Courses:</span>
+            <strong id="historyCountBadge">-- courses</strong>
+          </div>
+          <div class="history-list" id="userHistoryList">
+            <p class="empty-state">Loading user profile history...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALGORITHM & HYBRID WEIGHTING -->
+      <div class="panel">
+        <h2 class="panel-title"><span>⚙️</span> 2. Recommendation Strategy</h2>
+        
+        <div class="form-group">
+          <label for="strategySelect">Algorithm Engine</label>
+          <select id="strategySelect">
+            <option value="hybrid" selected>Hybrid (Weighted Content + Collaborative)</option>
+            <option value="content">Content-Based (TF-IDF & Cosine Similarity)</option>
+            <option value="collaborative">Collaborative Filtering (User-User Pearson)</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="alphaGroup">
+          <label for="alphaSlider">
+            Hybrid Balance (&alpha;): <strong id="alphaDisplay">50% Content / 50% Collab</strong>
+          </label>
+          <input type="range" id="alphaSlider" min="0.0" max="1.0" step="0.05" value="0.5">
+          <div class="slider-labels">
+            <span>0% (Pure Collaborative)</span>
+            <span>100% (Pure Content)</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="topKSlider">Top-K Recommendations: <strong id="topKDisplay">5</strong></label>
+          <input type="range" id="topKSlider" min="3" max="10" step="1" value="5">
+        </div>
+
+        <button class="btn btn-primary" id="generateRecsBtn">
+          <span>✨</span> Generate Personalized Recommendations
+        </button>
+      </div>
+
+      <!-- INTERACTIVE RATING PLAYGROUND -->
+      <div class="panel">
+        <h2 class="panel-title"><span>⭐</span> 3. Rate a New Course</h2>
+        <p class="panel-desc">Rate any course in the catalog to watch your recommendations adapt in real time.</p>
+
+        <form id="rateForm">
+          <div class="form-group">
+            <label for="rateCourseSelect">Select Course to Rate</label>
+            <select id="rateCourseSelect">
+              <!-- Populated via /api/catalog -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="ratingStarsSelect">Your Rating</label>
+            <select id="ratingStarsSelect">
+              <option value="5.0">⭐⭐⭐⭐⭐ 5.0 (Loved it)</option>
+              <option value="4.5">⭐⭐⭐⭐½ 4.5 (Great)</option>
+              <option value="4.0">⭐⭐⭐⭐ 4.0 (Good)</option>
+              <option value="3.5">⭐⭐⭐½ 3.5 (Decent)</option>
+              <option value="3.0">⭐⭐⭐ 3.0 (Average)</option>
+              <option value="2.0">⭐⭐ 2.0 (Poor)</option>
+            </select>
+          </div>
+
+          <button type="button" class="btn btn-secondary" id="submitRatingBtn">
+            <span>💾</span> Submit Rating & Retrain
+          </button>
+        </form>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT PANEL: RECOMMENDATIONS FEED & TELEMETRY -->
+    <section class="main-content">
+      
+      <!-- HERO RECOMMENDATION SUMMARY -->
+      <div class="recs-hero-card">
+        <div class="hero-top-row">
+          <span class="badge-execution">REAL TF-IDF & COLLABORATIVE MATRIX CALCULATION</span>
+          <span class="badge-latency" id="recLatencyBadge">-- ms</span>
+        </div>
+        <h2 class="hero-title" id="heroUserTitle">Personalized Recommendations for Learner</h2>
+        <p class="hero-subtitle" id="heroUserSubtitle">Recommendations computed using weighted semantic feature similarity and nearest-neighbor peer ratings.</p>
+      </div>
+
+      <!-- RECOMMENDATIONS FEED -->
+      <div class="recs-container">
+        <div class="feed-header">
+          <h3 class="feed-title">Recommended Next Steps</h3>
+          <span class="feed-count" id="feedCountBadge">5 Recommendations</span>
+        </div>
+
+        <div class="recs-grid" id="recsGrid">
+          <p class="empty-state">Click 'Generate Recommendations' to compute personalized suggestions.</p>
+        </div>
+      </div>
+
+      <!-- SYSTEM METRICS & MATRIX TELEMETRY -->
+      <div class="telemetry-grid">
+        <div class="telemetry-card">
+          <span class="telemetry-title">Catalog Size</span>
+          <span class="telemetry-value" id="telCatalog">25 Courses</span>
+          <span class="telemetry-sub">Total Technical Curriculum Items</span>
+        </div>
+        <div class="telemetry-card">
+          <span class="telemetry-title">Interaction Matrix</span>
+          <span class="telemetry-value text-primary" id="telRatings">1,043 Ratings</span>
+          <span class="telemetry-sub">Active Student Rating Pairs</span>
+        </div>
+        <div class="telemetry-card">
+          <span class="telemetry-title">Active Strategy</span>
+          <span class="telemetry-value text-accent" id="telMode">Hybrid</span>
+          <span class="telemetry-sub" id="telModeSub">Content + Collaborative</span>
+        </div>
+        <div class="telemetry-card">
+          <span class="telemetry-title">Compute Latency</span>
+          <span class="telemetry-value" id="telLatency">--</span>
+          <span class="telemetry-sub">Scikit-learn Matrix Multiplication</span>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

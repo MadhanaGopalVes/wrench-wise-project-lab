@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Image Classifier (Deep CNN) · Wrench Wise Project Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <a href="http://localhost:3000" class="back-link" title="Back to Project Lab">← Lab</a>
+      <span class="brand-badge">WISE ML LAB · PROJECT 05</span>
+      <h1 class="brand-title">AI Image Classifier & Computer Vision Engine</h1>
+    </div>
+    <div class="status-pill" id="backendStatus">
+      <span class="status-dot"></span>
+      <span id="statusText">Connecting to Python Vision Backend (Port 8005)...</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- LEFT PANEL: INPUT & SETTINGS -->
+    <aside class="sidebar">
+
+      <!-- IMAGE UPLOAD -->
+      <div class="panel">
+        <h2 class="panel-title"><span>📷</span> 1. Select or Upload Image</h2>
+        <p class="panel-desc">Upload your own photo or choose from our curated test benchmark gallery.</p>
+
+        <!-- DRAG AND DROP ZONE -->
+        <div class="drop-zone" id="dropZone">
+          <input type="file" id="fileInput" accept="image/*" style="display: none;">
+          <div class="drop-content">
+            <span class="drop-icon">📁</span>
+            <strong>Click to upload</strong> or drag & drop photo
+            <span class="drop-hint">Supports JPEG, PNG, WebP (Max 10MB)</span>
+          </div>
+        </div>
+
+        <!-- SAMPLE GALLERY -->
+        <div class="gallery-section">
+          <span class="gallery-title">Or test with benchmark gallery:</span>
+          <div class="gallery-grid" id="galleryGrid">
+            <!-- Populated dynamically via /api/samples -->
+            <div class="gallery-loading">Loading benchmark photos...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INFERENCE CONFIGURATION -->
+      <div class="panel">
+        <h2 class="panel-title"><span>⚙️</span> 2. Inference Parameters</h2>
+        
+        <div class="form-group">
+          <label for="topKInput">Top-K Predictions: <strong id="topKVal">5</strong></label>
+          <input type="range" id="topKInput" min="3" max="10" value="5">
+        </div>
+
+        <div class="form-group">
+          <label for="confThreshInput">Min Confidence Cutoff: <strong id="confThreshVal">1.0%</strong></label>
+          <input type="range" id="confThreshInput" min="0.0" max="15.0" value="1.0" step="0.5">
+        </div>
+
+        <div class="model-badge-box">
+          <div class="model-badge-title">Deep Learning Architecture</div>
+          <div class="model-badge-val">SqueezeNet 1.1 ONNX (1,000 ImageNet Classes)</div>
+        </div>
+
+        <button class="btn btn-primary" id="classifyBtn">
+          <span>⚡</span> Run Neural Classification
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT PANEL: PREVIEW & REAL-TIME PREDICTIONS -->
+    <section class="main-content">
+      
+      <!-- TOP WINNER HERO CARD -->
+      <div class="winner-card" id="winnerCard">
+        <div class="winner-badge-row">
+          <span class="badge-execution">REAL ONNX RUNTIME INFERENCE</span>
+          <span class="badge-latency" id="latencyBadge">-- ms</span>
+        </div>
+        <div class="winner-body">
+          <span class="winner-label">Top Predicted Object Class</span>
+          <h2 class="winner-name" id="winnerClass">Select an image to classify</h2>
+          <div class="winner-conf-row">
+            <div class="winner-conf-bar">
+              <div class="winner-conf-fill" id="winnerConfFill" style="width: 0%;"></div>
+            </div>
+            <span class="winner-conf-num" id="winnerConfNum">--%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- IMAGE INSPECTOR & COLOR TELEMETRY -->
+      <div class="preview-panel">
+        <div class="image-viewer-box">
+          <img id="activePreviewImg" src="" alt="Active Test Image" style="display: none;">
+          <div class="image-placeholder" id="imagePlaceholder">
+            <span>🖼️</span>
+            <p>No image selected. Click a sample or upload a file.</p>
+          </div>
+        </div>
+
+        <div class="image-meta-box">
+          <h3>Image Metadata & Preprocessing</h3>
+          <div class="meta-row">
+            <span>Dimensions:</span>
+            <strong id="metaDimensions">-- x --</strong>
+          </div>
+          <div class="meta-row">
+            <span>Input Tensor:</span>
+            <strong>[1, 3, 224, 224] NCHW</strong>
+          </div>
+          <div class="meta-row">
+            <span>Normalization:</span>
+            <strong>ImageNet ($\mu, \sigma$)</strong>
+          </div>
+          <div class="meta-row">
+            <span>Active Source:</span>
+            <strong id="metaSource">None</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROBABILITY DISTRIBUTION BARCHART -->
+      <div class="content-panel">
+        <div class="panel-header-flex">
+          <div>
+            <h2 class="panel-title"><span>📊</span> Confidence Probability Distribution (Softmax)</h2>
+            <p class="panel-desc">Calculated probability across ImageNet classes summing to 100%.</p>
+          </div>
+          <div class="prob-count" id="probCountBadge">5 Classes</div>
+        </div>
+
+        <div class="distribution-list" id="distributionList">
+          <p class="empty-state">Inference results will appear here after execution.</p>
+        </div>
+      </div>
+
+      <!-- DIAGNOSTIC TELEMETRY -->
+      <div class="telemetry-grid">
+        <div class="telemetry-card">
+          <span class="telemetry-title">Inference Speed</span>
+          <span class="telemetry-value" id="telLatency">--</span>
+          <span class="telemetry-sub">Hardware ONNX Execution Time</span>
+        </div>
+        <div class="telemetry-card">
+          <span class="telemetry-title">Confidence Margin</span>
+          <span class="telemetry-value text-primary" id="telMargin">--</span>
+          <span class="telemetry-sub">Top 1 minus Top 2 separation</span>
+        </div>
+        <div class="telemetry-card">
+          <span class="telemetry-title">Entropy / Uncertainty</span>
+          <span class="telemetry-value text-accent" id="telEntropy">--</span>
+          <span class="telemetry-sub">Information Entropy (Nats)</span>
+        </div>
+        <div class="telemetry-card">
+          <span class="telemetry-title">Output Space</span>
+          <span class="telemetry-value" id="telClasses">1,000</span>
+          <span class="telemetry-sub">Candidate ImageNet Classes</span>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

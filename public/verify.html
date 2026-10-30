@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verify Certificate | Wrench Wise Project Lab</title>
+<meta name="description" content="Verify the authenticity of a Wrench Wise Project Lab completion certificate.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<main>
+  <section class="hero" style="padding:48px 0 40px">
+    <div class="wrap" style="text-align:center">
+      <span class="eyebrow">VERIFICATION PORTAL</span>
+      <h1 style="margin:0 auto 12px">Credential Verification</h1>
+      <p class="lead" style="margin:0 auto">Confirm the genuine authenticity of any Wrench Wise Project Lab certificate.</p>
+    </div>
+  </section>
+
+  <div class="wrap" style="max-width:680px;padding:40px 24px">
+    <div class="panel" style="margin-bottom:28px">
+      <form id="verifyForm">
+        <div class="field">
+          <label for="vId">Enter Certificate ID</label>
+          <input id="vId" placeholder="e.g. WW-PL-XXXXXXXX-XX" style="font-family:var(--mono);text-transform:uppercase" required>
+        </div>
+        <button class="btn block" type="submit" id="vBtn">Verify Certificate</button>
+      </form>
+    </div>
+
+    <div id="vResult"></div>
+  </div>
+</main>
+<script src="/js/common.js"></script>
+<script>
+renderNav(false);
+const pathId = location.pathname.split('/')[2];
+if (pathId) {
+  $('#vId').value = pathId;
+  doVerify(pathId);
+}
+
+$('#verifyForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const id = $('#vId').value.trim().toUpperCase();
+  if (id) doVerify(id);
+});
+
+async function doVerify(id) {
+  $('#vResult').innerHTML = '<div style="text-align:center;padding:24px"><span class="spin dark"></span> Verifying...</div>';
+  try {
+    const res = await api('/api/verify/' + id);
+    if (res.valid) {
+      $('#vResult').innerHTML = `
+        <div class="panel" style="border:2px solid var(--green);background:#F0FDF4">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <span style="font-size:32px">✅</span>
+            <div>
+              <h3 style="color:#166534;margin:0">Verified Authentic Certificate</h3>
+              <span class="note" style="color:#15803D">Cryptographically checked check digits and database records</span>
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table class="t">
+              <tr><th>Recipient</th><td><b>${esc(res.name)}</b></td></tr>
+              <tr><th>Project Title</th><td><b>${esc(res.project)}</b></td></tr>
+              <tr><th>Domain</th><td>${esc(res.category || 'AI / Data')}</td></tr>
+              <tr><th>Final Score</th><td>${esc(res.score)}%</td></tr>
+              <tr><th>Issue Date</th><td>${fmtDate(res.issued_at)}</td></tr>
+              <tr><th>Credential ID</th><td><code>${esc(res.id)}</code></td></tr>
+            </table>
+          </div>
+          <div style="margin-top:18px;text-align:right">
+            <a class="btn sm" href="/certificate/${esc(res.id)}" target="_blank">View Official Certificate</a>
+          </div>
+        </div>
+      `;
+    } else {
+      $('#vResult').innerHTML = `
+        <div class="panel" style="border:2px solid var(--red);background:#FEF2F2">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="font-size:32px">❌</span>
+            <div>
+              <h3 style="color:#991B1B;margin:0">Invalid Credential</h3>
+              <p style="color:#B91C1C;margin:4px 0 0">${esc(res.reason || 'This certificate could not be verified.')}</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  } catch (err) {
+    $('#vResult').innerHTML = `
+      <div class="panel" style="border:2px solid var(--red);background:#FEF2F2">
+        <h3 style="color:#991B1B;margin:0">Verification Error</h3>
+        <p style="color:#B91C1C;margin:4px 0 0">${esc(err.message)}</p>
+      </div>
+    `;
+  }
+}
+renderFooter();
+</script>
+</body>
+</html>

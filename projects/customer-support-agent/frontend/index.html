@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Customer Support Agent · Wrench Wise Project Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span class="brand-badge">WW PROJECT 03</span>
+      <h1 class="brand-title">AI Customer Support Agent (Function Calling & Tools)</h1>
+    </div>
+    <div class="status-pill" id="backendStatus">
+      <span class="status-dot"></span>
+      <span id="statusText">Connecting to Agent Server...</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- LEFT PANEL: SCENARIO SELECTOR, DATABASE & APPROVALS -->
+    <aside>
+      <!-- SCENARIOS -->
+      <div class="panel">
+        <h2 class="panel-title">
+          <span>🎯</span> 1. Select Customer Scenario
+        </h2>
+        <p class="panel-desc">Click any real-world enterprise scenario to test tool invocation and decision routing.</p>
+
+        <div class="scenario-list">
+          <div class="scenario-card" data-prompt="Where is my keyboard order ORD-9011? When will it arrive?">
+            <div>
+              <div class="scenario-name">Order Tracking (Sarah Connor)</div>
+              <div style="font-size: 0.75rem; color: var(--muted);">Invokes <code>lookup_order</code></div>
+            </div>
+            <span class="scenario-tag">Tracking</span>
+          </div>
+
+          <div class="scenario-card" data-prompt="My 34-inch gaming monitor for order ORD-8422 arrived with a cracked screen! This is urgent!">
+            <div>
+              <div class="scenario-name">Damaged Item Escalation</div>
+              <div style="font-size: 0.75rem; color: var(--muted);">Invokes <code>lookup_order</code> + <code>create_support_ticket</code></div>
+            </div>
+            <span class="scenario-tag" style="background:#FEE2E2; color:#991B1B;">Escalation</span>
+          </div>
+
+          <div class="scenario-card" data-prompt="I received order ORD-5501 but want a refund of $45.00 please.">
+            <div>
+              <div class="scenario-name">Low-Value Refund ($45.00)</div>
+              <div style="font-size: 0.75rem; color: var(--muted);">Auto-approved (< $50 threshold)</div>
+            </div>
+            <span class="scenario-tag" style="background:#DCFCE7; color:#166534;">Auto-Approve</span>
+          </div>
+
+          <div class="scenario-card" data-prompt="My order ORD-7731 was delayed! I demand an immediate refund of $289.00!">
+            <div>
+              <div class="scenario-name">High-Value Refund ($289.00)</div>
+              <div style="font-size: 0.75rem; color: var(--muted);">Triggers Human Supervisor Gate</div>
+            </div>
+            <span class="scenario-tag" style="background:#FEF3C7; color:#92400E;">Human Gate</span>
+          </div>
+
+          <div class="scenario-card" data-prompt="What is your return policy and do you provide return shipping labels?">
+            <div>
+              <div class="scenario-name">Corporate Policy Inquiry</div>
+              <div style="font-size: 0.75rem; color: var(--muted);">Invokes <code>search_knowledge_base</code></div>
+            </div>
+            <span class="scenario-tag">Policy KB</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- HUMAN SUPERVISOR APPROVAL QUEUE -->
+      <div class="panel">
+        <h2 class="panel-title">
+          <span>🛡️</span> 2. Human Supervisor Approval Queue
+        </h2>
+        <p class="panel-desc">Refunds > $50 require human approval to safeguard against agent over-authority.</p>
+        
+        <div id="approvalsContainer">
+          <div style="text-align: center; color: var(--muted); padding: 1rem; font-size: 0.85rem;">
+            No pending approval requests. Trigger a high-value refund to test.
+          </div>
+        </div>
+      </div>
+
+      <!-- SIMULATED DATA PREVIEW -->
+      <div class="panel">
+        <h2 class="panel-title">
+          <span>🗄️</span> 3. Simulated Orders In Fulfillment DB
+        </h2>
+        <div style="max-height: 180px; overflow-y: auto; font-size: 0.78rem;" id="ordersPreview">
+          <!-- Populated from API -->
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT PANEL: INTERACTIVE CHAT & OBSERVABLE TRACE TIMELINE -->
+    <section>
+      <!-- CHAT INTERFACE -->
+      <div class="panel">
+        <h2 class="panel-title">
+          <span>💬</span> 4. Customer Support Interaction
+        </h2>
+        <p class="panel-desc">Watch the agent perceive inquiries, query real tool endpoints, and formulate resolution.</p>
+
+        <div class="chat-window" id="chatWindow">
+          <div class="message assistant">
+            <div class="message-bubble">
+              👋 Hello! I am your AI Customer Support Agent with live access to our order database, policy knowledge base, escalation ticketing, and refund systems. Select a scenario on the left or type your question below!
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-input-bar">
+          <input type="text" id="chatInput" class="chat-input" placeholder="Type customer message or order question...">
+          <button class="btn-send" id="sendBtn">Send</button>
+        </div>
+      </div>
+
+      <!-- OBSERVABLE EXECUTION TRACE TIMELINE -->
+      <div class="panel">
+        <h2 class="panel-title">
+          <span>🔬</span> 5. Observable Agent Execution Trace
+        </h2>
+        <p class="panel-desc">Real-time function calls, argument payloads, latency measurements, and tool outputs.</p>
+
+        <div class="trace-timeline" id="traceTimeline">
+          <div style="text-align: center; color: var(--muted); padding: 2rem; font-size: 0.85rem; border: 1px dashed var(--border); border-radius: 8px;">
+            Execution traces will appear here when the agent selects and executes tools.
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

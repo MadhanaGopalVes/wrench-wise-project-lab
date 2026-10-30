@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin & Analytics Dashboard | Wrench Wise Project Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<main>
+  <div class="wrap" style="padding:40px 24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:16px">
+      <div>
+        <span class="eyebrow">INTERNAL CONVERSION & CRM ANALYTICS</span>
+        <h1 style="margin:4px 0 0">Project Lab Dashboard</h1>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <input type="password" id="admToken" placeholder="Admin Token" style="padding:8px 12px;border:1px solid var(--line);border-radius:10px">
+        <button class="btn sm" id="loadBtn">Authenticate & Refresh</button>
+      </div>
+    </div>
+
+    <div id="content">
+      <div class="panel" style="text-align:center;padding:48px">
+        <p>Please enter your <code>ADMIN_TOKEN</code> above to access marketing analytics, lead events and CRM outbox sync.</p>
+      </div>
+    </div>
+  </div>
+</main>
+<script src="/js/common.js"></script>
+<script>
+renderNav(false);
+
+const tokenKey = 'ww_adm_token';
+const saved = sessionStorage.getItem(tokenKey);
+if (saved) {
+  $('#admToken').value = saved;
+  loadData(saved);
+}
+
+$('#loadBtn').addEventListener('click', () => {
+  const t = $('#admToken').value.trim();
+  if (t) {
+    sessionStorage.setItem(tokenKey, t);
+    loadData(t);
+  }
+});
+
+async function loadData(token) {
+  $('#content').innerHTML = '<div style="text-align:center;padding:48px"><span class="spin dark"></span> Loading metrics...</div>';
+  try {
+    const res = await api('/api/admin/analytics', undefined, 'GET', { 'x-admin-token': token });
+    renderDashboard(res, token);
+  } catch (e) {
+    $('#content').innerHTML = `<div class="form-err">${esc(e.message)}</div>`;
+  }
+}
+
+function renderDashboard(data, token) {
+  const { totals, projects, crm, ai, enrolmentConversion } = data;
+  $('#content').innerHTML = `
+    <div class="stat-row">
+      <div class="stat-tile"><b>${totals.learners}</b><span>Total Registered Leads</span></div>
+      <div class="stat-tile"><b>${totals.certificates}</b><span>Certificates Issued</span></div>
+      <div class="stat-tile"><b>${totals.repeatRate ? totals.repeatRate + '%' : '0%'}</b><span>Repeat Project Rate (${totals.repeatParticipants} learners)</span></div>
+      <div class="stat-tile"><b>${totals.marketingConsent}</b><span>Opted-In to Marketing</span></div>
+    </div>
+
+    <div class="row2" style="margin-bottom:28px">
+      <div class="panel">
+        <h3>CRM Outbox Integration (${esc(crm.provider.toUpperCase())})</h3>
+        <p class="note">${crm.configured ? 'Active connection configured.' : 'Running in local outbox mode (events stored durably in SQLite).'}</p>
+        <div style="display:flex;gap:12px;margin:16px 0">
+          <span class="pill dark">Pending: <b>${crm.pending}</b></span>
+          <span class="pill dark">Sent: <b>${crm.sent}</b></span>
+          <span class="pill dark">Failed: <b>${crm.failed}</b></span>
+        </div>
+        <button class="btn sm soft" id="flushBtn">Trigger CRM Sync Flush</button>
+      </div>
+
+      <div class="panel">
+        <h3>AI Provider Mode</h3>
+        <div style="margin-top:12px">
+          ${modeBadge(ai.mode, ai.provider)}
+          <p class="note" style="margin-top:10px">Model: <code>${esc(ai.model || 'Deterministic Local Engine / Rules')}</code></p>
+          <p class="note">Learner Daily Quota limit is enforced per learner IP/account.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:28px">
+      <h3>Project Performance Funnel</h3>
+      <div class="tbl-wrap" style="margin-top:14px">
+        <table class="t">
+          <thead>
+            <tr>
+              <th>Project</th>
+              <th>Views</th>
+              <th>Unlocked</th>
+              <th>Activation %</th>
+              <th>Completion %</th>
+              <th>Assessment Pass %</th>
+              <th>Certificates</th>
+              <th>Course Inquiries</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${projects.map(p => `
+              <tr>
+                <td><b>${esc(p.title)}</b></td>
+                <td>${p.views}</td>
+                <td>${p.unlocked}</td>
+                <td>${p.activation != null ? p.activation + '%' : '-'}</td>
+                <td>${p.completionRate != null ? p.completionRate + '%' : '-'}</td>
+                <td>${p.assessmentPassRate != null ? p.assessmentPassRate + '%' : '-'}</td>
+                <td><b>${p.certificates}</b></td>
+                <td>${p.courseViews} (${p.courseEnquiryRate != null ? p.courseEnquiryRate + '%' : '0%'})</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <h3>Recent Leads (CRM View)</h3>
+        <button class="btn sm soft" id="refreshLeads">Refresh Leads</button>
+      </div>
+      <div id="leadsList"><span class="spin dark"></span> Loading leads...</div>
+    </div>
+  `;
+
+  $('#flushBtn').addEventListener('click', async (e) => {
+    busy(e.currentTarget, async () => {
+      try {
+        const r = await api('/api/admin/crm/flush', {}, 'POST', { 'x-admin-token': token });
+        toast(`Flushed outbox: ${r.delivered} delivered.`);
+        loadData(token);
+      } catch (err) { toast(err.message); }
+    });
+  });
+
+  loadLeads(token);
+  $('#refreshLeads').addEventListener('click', () => loadLeads(token));
+}
+
+async function loadLeads(token) {
+  try {
+    const res = await api('/api/admin/leads', undefined, 'GET', { 'x-admin-token': token });
+    $('#leadsList').innerHTML = `
+      <div class="tbl-wrap">
+        <table class="t">
+          <thead>
+            <tr>
+              <th>Learner</th>
+              <th>Contact</th>
+              <th>Project</th>
+              <th>Activity Status</th>
+              <th>Certificate</th>
+              <th>Consent</th>
+              <th>Last Active</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${res.leads.map(l => `
+              <tr>
+                <td><b>${esc(l.name)}</b></td>
+                <td>${esc(l.email)}<br><small class="note">${esc(l.phone)}</small></td>
+                <td>${esc(l.selected_project || '-')}</td>
+                <td><span class="pill ${l.project_activity_status === 'Completed' ? 'Beginner' : 'dark'}">${esc(l.project_activity_status)}</span></td>
+                <td>${l.certificate_id ? `<code>${esc(l.certificate_id)}</code>` : '-'}</td>
+                <td>${l.marketing_consent ? '✅ Yes' : 'No'}</td>
+                <td><small>${new Date(l.last_activity).toLocaleString()}</small></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  } catch (e) {
+    $('#leadsList').innerHTML = `<div class="form-err">${esc(e.message)}</div>`;
+  }
+}
+renderFooter();
+</script>
+</body>
+</html>
